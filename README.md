@@ -40,11 +40,35 @@ The sizes of different types of memory and the number of functional units within
 
 The actual hardware layout of a GPU or the way it physically carries out the execution of the programming model may vary. These differences do not affect correctness of software written using the CUDA programming model.
 
-<p align="center">
+<p align="center" style="background-color: white; padding: 20px;">
   <img src="images/gpu-cpu-system-diagram.png" alt="GPU and CPU System" width="900"/>
 </p>
 
 A GPU has many streaming multiprocessors (SMs), each of which contains many functional units. Graphics processing clusters (GPCs) are collections of SMs. A GPU is a set of GPCs connected to the GPU memory. A CPU typically has several cores and a memory controller which connects to the system memory. A CPU and a GPU are connected by an interconnect such as PCIe or NVLINK.
+
+### Thread Blocks and Grids
+
+When an application launches a kernel, it does so with many threads, often millions of threads organized into blocks.
+
+Thread Block: Block of threads
+Grid: Thread blocks are organized into a grid.
+
+All the thread blocks in a grid have the same size and dimensions.
+
+<p align="center" style="background-color: white; padding: 20px;">
+  <img src="images/grid-of-thread-blocks.png" alt="Grid of Thread Blocks" width="900"/>
+</p>
+
+Thread blocks and grids may be 1, 2, or 3 dimensional. These dimensions can simplify mapping of individual threads to units of work or data items.
+
+Kernel is launched with a specific "execution configuration" that specifies the grid and thread block dimensions. It can also include optional parms such as cluster size, stream, and SM configuration settings.
+
+A grid may have millions of thread blocks, while a GPU executing the grid may have far less, maybe 10 or 100 SMs.
+
+All threads of a thread block will be executed in a single SM and mostly complete in the same SM. The thread blocks cannot rely on any result from another thread blocks, so no dependencies between threads of different yhread blocks.
+
+A thread should not depend on results from or synchronize with a thread in a different thread block of the same grid. All the threads within a thread block run on the same SM at the same time. Different thread blocks within the grid are scheduled among the available SMs and may be executed in any order. In short, the CUDA programming model requires that it be possible to execute thread blocks in any order, in parallel or in series.
+
 
 
 ## Programming GPUs in CUDA
